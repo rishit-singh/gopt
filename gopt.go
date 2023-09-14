@@ -1,11 +1,14 @@
 package main;
 
 import (
-	"fmt"; 
+	"fmt";
+	"net/http";
 	"encoding/json";
+	"io/ioutil";
+	"strings";
 ); 
 
-type any=interface{};
+type any = interface{};
 
 type OpenAIMessage struct {
 	Role string;
@@ -52,32 +55,63 @@ func (request *OpenAIRequest) ToJson() any {
 } 
 
 type GoptConfig struct {
+	BaseURL string;
 	APIKey string;
 }
 
 type GoptInstance struct {
 	Config GoptConfig;
+
+	HttpClient *http.Client;
 }
+ 
+func (instance *GoptInstance) Prompt(prompt string) any {
+	openAIRequest := OpenAIRequest{Model: "gpt-4", Messages: []OpenAIMessage{ OpenAIMessage{Role: "user", Content: prompt} }};
+	requestStr, ok := openAIRequest.ToJson().(string);
 
-func (instance *GoptInstance) Prompt(prompt string) bool {
-	fmt.Println(prompt);
+	fmt.Println(requestStr);
 
-	return true;
-}
+	if (!ok) {
+		return nil;
+	}
 
-func NewGoptInstance(config GoptConfig) *GoptInstance {
-	instance := new(GoptInstance);
+	request, err := http.NewRequest("POST", fmt.Sprintf("%s/%s", instance.Config.BaseURL, "chat/completions"), strings.NewReader(requestStr));	
+	
+	if (err != nil) {
+		fmt.Println(err);
 
-	instance.Config = config
+		return false;
+	}
+	
+	request.Header.Add("Content-Type", "application/json");
+	request.Header.Add("Authorization", fmt.Sprintf("Bearer %s", instance.Config.APIKey));
 
-	return instance;
+	response, err := instance.HttpClient.Do(request);
+
+	if (err != nil) {
+		fmt.Println(err);
+
+		return nil;
+	}
+	
+	defer response.Body.Close();
+
+	body, err := ioutil.ReadAll(response.Body); 
+
+	if (err != nil)	{
+		fmt.Println(err);
+		return nil;
+	}
+
+	return string(body);
 }
 
 func main() {
-	request := OpenAIRequest{Model: "gpt-4", Messages: []OpenAIMessage{ OpenAIMessage{Role: "user", Content: "Hello World!"} }}
+	instance := GoptInstance{Config: GoptConfig{BaseURL: "https://api.openai.com/v1", APIKey: ""}, HttpClient: &http.Client{}};
 
-	fmt.Println(request.ToJson());
+	s, ok := instance.Prompt("Hello World!").(string);
+	
+	fmt.Println(s);
+	fmt.Println(ok);
 } 
-
-
 
