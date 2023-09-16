@@ -1,13 +1,13 @@
 package main;
 
 import (
-	"os";
-	"fmt";
-	"errors";
-	"net/http";
-	"encoding/json";
-	"io/ioutil";
-	"gopt/util";
+	"os"
+	"fmt"
+	"errors"
+	"net/http"
+	"encoding/json"
+	"io/ioutil"
+	"gopt/util"
 ); 
 
 type any = interface{};
@@ -85,9 +85,6 @@ func (instance *GoptInstance) Prompt(prompt string) (any, error) {
 
 		return false, err;
 	}
-	
-	// request.Header.Add("Content-Type", "application/json");
-	// request.Header.Add("Authorization", fmt.Sprintf("Bearer %s", instance.Config.APIKey));
 
 	response, err := instance.HttpClient.Do(request.Request);
 
@@ -108,20 +105,16 @@ func (instance *GoptInstance) Prompt(prompt string) (any, error) {
 	bodyMap := bodyMapAny.(map[string]any)
 
 	errorMessage, ok := bodyMap["error"];
-
-	if (ok) {
-		return nil, errors.New(errorMessage.(string));
+ 
+	if (ok) { // error exists
+		return nil, errors.New(errorMessage.(map[string]any)["message"].(string));
 	}
 
-	choices := bodyMap["choices"].([]map[string]any);
-	
-	choice := choices[0];
-		
-	return choice["content"].(string), nil;
+	return bodyMap["choices"].([]any)[0].(map[string]any)["message"].(map[string]any)["content"].(string), nil;
 }
 
 func main() {
-	instance := GoptInstance{Config: GoptConfig{BaseURL: "https://api.openai.com/v1", APIKey: ""}, HttpClient: &http.Client{}};
+	instance := GoptInstance{Config: GoptConfig{BaseURL: "https://api.openai.com/v1", APIKey: "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"}, HttpClient: &http.Client{}};
 
 	prompt, err := util.CombineStrings(os.Args, " ", 1, len(os.Args) - 1);
 	
@@ -139,14 +132,15 @@ func main() {
 
 	s, err := instance.Prompt(promptStr); 
 	
-	result := s.(string);	
-
 	if (err != nil) {
 		fmt.Println(err);
 
 		return;
 	}
+	
+	result := s.(string);	
 
 	fmt.Println(result);
 } 
+
 
