@@ -114,7 +114,7 @@ func (instance *GoptInstance) Prompt(prompt string) (any, error) {
 }
 
 func main() {
-	instance := GoptInstance{Config: GoptConfig{BaseURL: "https://api.openai.com/v1", APIKey: "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"}, HttpClient: &http.Client{}};
+	instance := GoptInstance{Config: GoptConfig{BaseURL: "https://api.openai.com/v1", APIKey: ""}, HttpClient: &http.Client{}};
 
 	prompt, err := util.CombineStrings(os.Args, " ", 1, len(os.Args) - 1);
 	
