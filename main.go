@@ -113,8 +113,9 @@ func (instance *GoptInstance) Prompt(prompt string) (any, error) {
 	return bodyMap["choices"].([]any)[0].(map[string]any)["message"].(map[string]any)["content"].(string), nil;
 }
 
+
 func main() {
-	instance := GoptInstance{Config: GoptConfig{BaseURL: "https://api.openai.com/v1", APIKey: ""}, HttpClient: &http.Client{}};
+	instance := GoptInstance{Config: GoptConfig{BaseURL: "https://api.openai.com/v1", APIKey: "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"}, HttpClient: &http.Client{}};
 
 	prompt, err := util.CombineStrings(os.Args, " ", 1, len(os.Args) - 1);
 	
