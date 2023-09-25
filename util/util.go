@@ -34,8 +34,7 @@ func InRange(val int, low int, high int) bool {
 }
 
 func CombineStrings(strs []string, delimiter string, start int, end int) (any, error) {
-	size := len(strs);
-	
+	size := len(strs);	
 	combined := "";
 
 	if (!InRange(end, 0, size) && !InRange(start, 0, end + 1)) {
@@ -63,4 +62,10 @@ func JsonToMap(jsonStr string) (any, error) {
 	
 	return jsonMap, nil;
 }	
+
+func MapContainsKey(key any, hmap map[any]any) bool {
+	value, err := hmap[key];
+	
+	return err == nil;
+}
 

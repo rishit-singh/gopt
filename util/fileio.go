@@ -12,4 +12,10 @@ func ReadJsonFile(path string) (any, error) {
 	}
 
 	return JsonToMap(string(buffer));
-}  
+} 
+
+func FileExists(path string) bool {
+	_, err = os.Stat(path); 
+
+	return err == nil;
+}

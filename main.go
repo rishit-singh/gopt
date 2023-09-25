@@ -113,10 +113,41 @@ func (instance *GoptInstance) Prompt(prompt string) (any, error) {
 	return bodyMap["choices"].([]any)[0].(map[string]any)["message"].(map[string]any)["content"].(string), nil;
 }
 
+func LoadGptConfig(configPath string) any {
+	if (!util.FileExists(configPath)) {
+		fmt.Println("%s not found, creating the file now.");
+
+		os.Create(configPath);
+	}
+
+	configMap := util.LoadJsonFile(configPath);
+	
+	keys := []string { "apikey", "baseurl" };
+	
+	if (configMap == nil) {
+		fmt.Println("Invalid config provide.");
+
+		return configMap;
+	}	
+
+	for (x := 0; x < len(keys); x++) {
+		if (util.MapContainsKey(key, configMap)) {
+			fmt.Println("%s not provided in the config.", key);
+
+			return false;
+		}
+	}
+
+	config := GptConfig{BaseURL: configMap["baseurl"].(string), APIKey: configMap["apikey"].(string)};
+
+	return config;
+}
 
 func main() {
-	instance := GoptInstance{Config: GoptConfig{BaseURL: "https://api.openai.com/v1", APIKey: ""}, HttpClient: &http.Client{}};
+	// instance := GoptInstance{Config: GoptConfig{BaseURL: "https://api.openai.com/v1", APIKey: ""}, HttpClient: &http.Client{}};
 
+	instance := GoptInstance{ Config: LoadGptConfig("goptconfig.json").(GoptConfig), HttpClient: &http.Client{}};
+	
 	prompt, err := util.CombineStrings(os.Args, " ", 1, len(os.Args) - 1);
 	
 	if (err != nil) {
@@ -142,6 +173,4 @@ func main() {
 	result := s.(string);	
 
 	fmt.Println(result);
-} 
-
-
+}
